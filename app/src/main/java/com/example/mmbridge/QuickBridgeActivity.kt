@@ -15,22 +15,18 @@ class QuickBridgeActivity : AppCompatActivity() {
 
         val amount = intent.getStringExtra("EXTRA_AMOUNT") ?: ""
         val bankName = intent.getStringExtra("EXTRA_BANK") ?: ""
-        val note = intent.getStringExtra("EXTRA_NOTE") ?: ""
 
         if (amount.isNotEmpty()) {
-            // คัดลอกทั้งยอดเงิน และ โน้ต ลงใน Clipboard (เมื่ออยู่ใน Foreground Activity จะสามารถใส่ Clipboard บน Android 10-14+ ได้ 100%)
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             clipboard.setPrimaryClip(ClipData.newPlainText("MM_Amount", amount))
 
             Toast.makeText(
                 this,
-                "คัดลอกยอด $amount บ. ($bankName) แล้ว!
-กดวาง (Paste) ในแอปหมูแดงได้เลย",
+                "คัดลอกยอด $amount บ. ($bankName) แล้ว! กดวาง (Paste) ในแอปหมูแดงได้เลย",
                 Toast.LENGTH_LONG
             ).show()
         }
 
-        // เปิดแอป Money Manager (หมูสีแดง) ทันที
         val launchIntent = packageManager.getLaunchIntentForPackage("com.realbyteapps.moneymanagerfree")
             ?: packageManager.getLaunchIntentForPackage("com.realbyteapps.moneymanager")
 

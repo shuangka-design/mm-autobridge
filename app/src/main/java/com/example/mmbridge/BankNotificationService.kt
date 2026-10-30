@@ -17,7 +17,7 @@ class BankNotificationService : NotificationListenerService() {
 
     private var slipObserver: SlipObserverHelper? = null
     private var lastTriggerTime = 0L
-    private val CHANNEL_ID = "mm_safe_bridge_channel"
+    private val channelId = "mm_safe_bridge_channel"
 
     override fun onCreate() {
         super.onCreate()
@@ -52,20 +52,16 @@ class BankNotificationService : NotificationListenerService() {
 
     private fun handleDetectedTransaction(item: TransactionItem) {
         val now = System.currentTimeMillis()
-        // ป้องกันการซ้ำซ้อนหากแจ้งเตือนและสลิปมาพร้อมกันภายใน 5 วินาที
         if (now - lastTriggerTime < 5000) return
         lastTriggerTime = now
 
-        // 1. บันทึกลงคลังสะสมของแอป (เผื่อกด Export .xls/.tsv เข้าแอปหมูแดงทีเดียว)
         TransactionQueue.addTransaction(this, item)
 
-        // 2. คัดลอกยอดเงินลง Clipboard เบื้องต้น
         try {
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             clipboard.setPrimaryClip(ClipData.newPlainText("amount", item.amount))
         } catch (_: Exception) {}
 
-        // 3. เด้งแจ้งเตือนปุ่มด่วน "แตะเพื่อคัดลอกยอด & เปิดแอปหมูแดง" (ปลอดภัย 100% ไม่ใช้ Accessibility)
         showQuickActionNotification(item)
     }
 
@@ -84,10 +80,10 @@ class BankNotificationService : NotificationListenerService() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+        val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("💸 จ่ายผ่าน ${item.bankName}: ${item.amount} บาท")
-            .setContentText("แตะที่นี่เพื่อคัดลอกยอด ${item.amount} บ. และเปิดแอปหมูแดงทันที (${item.note})")
+            .setContentTitle("จ่ายผ่าน ${item.bankName}: ${item.amount} บาท")
+            .setContentText("แตะเพื่อคัดลอกยอด ${item.amount} บ. และเปิดแอปหมูแดง (${item.note})")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .setAutoCancel(true)
@@ -106,7 +102,7 @@ class BankNotificationService : NotificationListenerService() {
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                CHANNEL_ID,
+                channelId,
                 "แจ้งเตือนส่งยอดเข้าแอปหมูแดง",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {

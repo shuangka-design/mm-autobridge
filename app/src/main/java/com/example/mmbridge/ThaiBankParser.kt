@@ -2,7 +2,6 @@ package com.example.mmbridge
 
 object ThaiBankParser {
 
-    // Package Names ของทั้ง 5 แอปการเงินที่ต้องการดักจับ
     val SUPPORTED_PACKAGES = mapOf(
         "ktbcs.netbank" to "กรุงไทย (KTB)",
         "com.bangkokbank.mobilebanking" to "กรุงเทพ (BBL)",

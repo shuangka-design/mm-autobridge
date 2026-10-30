@@ -11,8 +11,8 @@ android {
         applicationId = "com.example.mmbridge"
         minSdk = 26
         targetSdk = 34
-        versionCode = 2
-        versionName = "2.0-SafeMode"
+        versionCode = 3
+        versionName = "3.0-SafeMode"
     }
 
     buildTypes {
@@ -37,6 +37,5 @@ dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
-    // Google ML Kit Text Recognition (อ่านตัวเลขยอดเงินจากรูปสลิปแบบออฟไลน์)
     implementation("com.google.mlkit:text-recognition:16.0.0")
 }

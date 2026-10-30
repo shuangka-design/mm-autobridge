@@ -2,7 +2,6 @@ package com.example.mmbridge
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -14,7 +13,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -38,7 +36,6 @@ class MainActivity : AppCompatActivity() {
         }
         rootLayout.addView(titleView)
 
-        // ปุ่มที่ 1: เปิดสิทธิ์อ่าน Notification
         val btnNotif = Button(this).apply {
             text = "1. เปิดสิทธิ์อ่านแจ้งเตือนธนาคาร (Notification)"
             setOnClickListener {
@@ -47,7 +44,6 @@ class MainActivity : AppCompatActivity() {
         }
         rootLayout.addView(btnNotif)
 
-        // ปุ่มที่ 2: ขอสิทธิ์อ่านรูปสลิป + แจ้งเตือน
         val btnStorage = Button(this).apply {
             text = "2. อนุญาตให้อ่านรูปสลิป & แสดงปุ่มด่วน"
             setOnClickListener {
@@ -56,9 +52,8 @@ class MainActivity : AppCompatActivity() {
         }
         rootLayout.addView(btnStorage)
 
-        // ปุ่มที่ 3: ทดสอบจำลองรายการใช้จ่าย
         val btnTest = Button(this).apply {
-            text = "⚡ ทดสอบคัดลอกยอด 150.00 บ. & เปิดแอปหมูแดง"
+            text = "ทดสอบคัดลอกยอด 150.00 บ. & เปิดแอปหมูแดง"
             setOnClickListener {
                 val testItem = TransactionItem(
                     bankName = "กรุงไทย (KTB)",
@@ -78,9 +73,8 @@ class MainActivity : AppCompatActivity() {
         }
         rootLayout.addView(btnTest)
 
-        // ปุ่มที่ 4: ส่งออกไฟล์ .xls สำหรับกด Import เข้าแอปหมูแดงทีเดียวทั้งวัน
         val btnExport = Button(this).apply {
-            text = "📥 สร้างไฟล์ .xls (สำหรับ Import เข้าแอปหมูแดงทีเดียว)"
+            text = "สร้างไฟล์ .xls (สำหรับ Import เข้าแอปหมูแดงทีเดียว)"
             setOnClickListener {
                 exportToDownloads()
             }
@@ -123,8 +117,7 @@ class MainActivity : AppCompatActivity() {
             file.writeText(content, Charsets.UTF_8)
             Toast.makeText(
                 this,
-                "บันทึกไฟล์ที่ Download/MoneyManager_AutoImport.xls แล้ว!
-เข้าแอปหมูแดง > ตั้งค่า > จัดการข้อมูล > นำเข้าไฟล์ .xls ได้เลย",
+                "บันทึกไฟล์ที่ Download/MoneyManager_AutoImport.xls แล้ว!",
                 Toast.LENGTH_LONG
             ).show()
         } catch (e: Exception) {

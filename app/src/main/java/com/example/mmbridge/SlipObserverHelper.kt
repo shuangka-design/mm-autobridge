@@ -25,63 +25,71 @@ class SlipObserverHelper(
     }
 
     fun startWatching() {
-        context.contentResolver.registerContentObserver(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            true,
-            contentObserver
-        )
-        TransactionQueue.addLog("เริ่มระบบเฝ้าดูรูปสลิปอัตโนมัติ (Safe Mode)")
+        try {
+            context.contentResolver.registerContentObserver(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                true,
+                contentObserver
+            )
+            TransactionQueue.addLog("เริ่มระบบเฝ้าดูรูปสลิปอัตโนมัติ (Safe Mode)")
+        } catch (e: Exception) {
+            TransactionQueue.addLog("ไม่สามารถเริ่มเฝ้าดูรูปสลิป: ${e.message}")
+        }
     }
 
     fun stopWatching() {
-        context.contentResolver.unregisterContentObserver(contentObserver)
+        try {
+            context.contentResolver.unregisterContentObserver(contentObserver)
+        } catch (_: Exception) {}
     }
 
     private fun checkLatestImage() {
-        val projection = arrayOf(
-            MediaStore.Images.Media._ID,
-            MediaStore.Images.Media.DISPLAY_NAME,
-            MediaStore.Images.Media.RELATIVE_PATH
-        )
-        val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
+        try {
+            val projection = arrayOf(
+                MediaStore.Images.Media._ID,
+                MediaStore.Images.Media.DISPLAY_NAME,
+                MediaStore.Images.Media.RELATIVE_PATH
+            )
+            val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
 
-        context.contentResolver.query(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            projection,
-            null,
-            null,
-            sortOrder
-        )?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID))
-                val name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)) ?: ""
-                val path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.RELATIVE_PATH)) ?: ""
+            context.contentResolver.query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                null,
+                null,
+                sortOrder
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID))
+                    val name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)) ?: ""
+                    val path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.RELATIVE_PATH)) ?: ""
 
-                if (id == lastProcessedId) return
+                    if (id == lastProcessedId) return
 
-                val bankFolderMap = mapOf(
-                    "Krungthai" to "กรุงไทย (KTB)",
-                    "KTB" to "กรุงไทย (KTB)",
-                    "Bualuang" to "กรุงเทพ (BBL)",
-                    "BBL" to "กรุงเทพ (BBL)",
-                    "KMA" to "กรุงศรี (KMA)",
-                    "Krungsri" to "กรุงศรี (KMA)",
-                    "MyMo" to "ออมสิน (MyMo)",
-                    "GSB" to "ออมสิน (MyMo)",
-                    "TrueMoney" to "TrueMoney"
-                )
+                    val bankFolderMap = mapOf(
+                        "Krungthai" to "กรุงไทย (KTB)",
+                        "KTB" to "กรุงไทย (KTB)",
+                        "Bualuang" to "กรุงเทพ (BBL)",
+                        "BBL" to "กรุงเทพ (BBL)",
+                        "KMA" to "กรุงศรี (KMA)",
+                        "Krungsri" to "กรุงศรี (KMA)",
+                        "MyMo" to "ออมสิน (MyMo)",
+                        "GSB" to "ออมสิน (MyMo)",
+                        "TrueMoney" to "TrueMoney"
+                    )
 
-                val matchedBank = bankFolderMap.entries.firstOrNull {
-                    path.contains(it.key, ignoreCase = true) || name.contains(it.key, ignoreCase = true)
-                }?.value
+                    val matchedBank = bankFolderMap.entries.firstOrNull {
+                        path.contains(it.key, ignoreCase = true) || name.contains(it.key, ignoreCase = true)
+                    }?.value
 
-                if (matchedBank != null) {
-                    lastProcessedId = id
-                    val imageUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id.toString())
-                    scanSlipAmount(imageUri, matchedBank)
+                    if (matchedBank != null) {
+                        lastProcessedId = id
+                        val imageUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id.toString())
+                        scanSlipAmount(imageUri, matchedBank)
+                    }
                 }
             }
-        }
+        } catch (_: Exception) {}
     }
 
     private fun scanSlipAmount(uri: Uri, bankName: String) {

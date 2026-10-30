@@ -1,12 +1,15 @@
 package com.example.mmbridge
 
 import android.content.Context
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 data class TransactionItem(
     val bankName: String,
     val amount: String,
     val note: String,
-    val dateStr: String = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date()),
+    val dateStr: String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()),
     val timestamp: Long = System.currentTimeMillis()
 )
 
@@ -21,15 +24,16 @@ object TransactionQueue {
     }
 
     fun addLog(msg: String) {
-        val time = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
+        val time = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
         historyLogs.add(0, "[$time] $msg")
-        if (historyLogs.size > 50) historyLogs.removeLast()
+        if (historyLogs.size > 50) {
+            historyLogs.removeAt(historyLogs.size - 1)
+        }
     }
 
     private fun saveToPrefs(context: Context, item: TransactionItem) {
         val prefs = context.getSharedPreferences("mm_bridge_history", Context.MODE_PRIVATE)
         val existing = prefs.getString("tsv_rows", "") ?: ""
-        // รูปแบบ TSV มาตรฐานของแอป Money Manager (Date, Account, Category, Subcategory, Note, Amount, Income/Expense, Description)
         val newRow = "${item.dateStr}	${item.bankName}	อาหาร/ทั่วไป		${item.note}	${item.amount}	Expense	"
         val updated = if (existing.isEmpty()) newRow else "$existing
 $newRow"
